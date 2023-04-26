@@ -24,7 +24,7 @@ This codebase was created to demonstrate a fully fledged fullstack application b
     * [rs/xid](https://github.com/rs/xid) for generating UUIDs
     * [stretchr/testify](https://github.com/stretchr/testify) for testing
     * [golang/mock](https://github.com/golang/mock) for mocking dependencies
-    * [ory/dockertest](https://github.com/ory/dockertest) for test database container
+    * [ory/dockertest](https://github.com/ory/dockertest) for test database container during e2e test
     * [swaggo/swag](https://github.com/swaggo/swag) for API documentation
 * Also uses:
     * *PostgreSQL* for the database
