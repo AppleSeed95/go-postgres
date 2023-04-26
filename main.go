@@ -91,7 +91,7 @@ func main() {
 	server.MountSwaggerHandlers()
 
 	addr := fmt.Sprintf(":%s", config.Port)
-	
+
 	// add graceful shutdown
 	srv := &http.Server{
 		Addr:    addr,
@@ -103,8 +103,8 @@ func main() {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
-	
-		// Wait for interrupt signal to gracefully shutdown the server with
+
+	// Wait for interrupt signal to gracefully shutdown the server with
 	// a timeout of 5 seconds.
 	quit := make(chan os.Signal, 1)
 	// kill (no param) default send syscall.SIGTERM
