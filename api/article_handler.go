@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -549,6 +550,7 @@ func (s *Server) GetArticle(c *gin.Context) { // TODO:✅ GET /articles/:slug - 
 	slug := c.Param("slug")
 	article, err := Nullable(s.store.GetArticleBySlug(c, slug))
 	if err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, NewError(err))
 		return
 	}

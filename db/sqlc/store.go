@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/rand"
 	"regexp"
 	"strings"
@@ -74,6 +75,7 @@ func (store *ConduitStore) CreateArticleTx(
 		uniqueSlug := createUniqueSlug(arg.Title)
 		articleID, err := NullableID(qtx.GetArticleIDBySlug(ctx, uniqueSlug))
 		if err != nil {
+			fmt.Printf("4: error: %v", err)
 			return nil, err
 		}
 		if articleID == "" {
@@ -81,8 +83,10 @@ func (store *ConduitStore) CreateArticleTx(
 			arg.Slug = uniqueSlug
 		}
 	}
+	fmt.Printf("arg: %+v\n", arg)
 	article, err := qtx.CreateArticle(ctx, arg.CreateArticleParams)
 	if err != nil {
+		fmt.Printf("5: error: %v\n", err)
 		return nil, err
 	}
 	tags := arg.Tags
@@ -93,6 +97,7 @@ func (store *ConduitStore) CreateArticleTx(
 		}
 		id, err := qtx.CreateTag(ctx, p)
 		if err != nil {
+			fmt.Printf("6: error: %v\n", err)
 			return nil, err
 		}
 		_, err = qtx.CreateArticleTag(ctx, CreateArticleTagParams{
@@ -100,11 +105,13 @@ func (store *ConduitStore) CreateArticleTx(
 			TagID:     id,
 		})
 		if err != nil {
+			fmt.Printf("7: error: %v\n", err)
 			return nil, err
 		}
 	}
 	user, err := qtx.GetUser(ctx, article.AuthorID)
 	if err != nil {
+		fmt.Printf("8: error: %v\n", err)
 		return nil, err
 	}
 	if err = tx.Commit(context.Background()); err != nil {
@@ -140,12 +147,15 @@ func (store *ConduitStore) UpdateArticleTx(
 	qtx := store.Queries.WithTx(tx)
 	a, err := Nullable(qtx.GetArticleAuthorIDBySlug(ctx, *arg.Slug))
 	if err != nil {
+		fmt.Printf("1: error: %v", err)
 		return nil, err
 	}
 	if a == nil {
+		fmt.Printf("2: error: %v", err)
 		return nil, ErrNotFound
 	}
 	if a.AuthorID != arg.AuthorID {
+		fmt.Printf("3: error: %v", err)
 		return nil, ErrForbidden
 	}
 	arg.ID = a.ID
@@ -162,6 +172,7 @@ func (store *ConduitStore) UpdateArticleTx(
 			uniqueSlug := createUniqueSlug(*arg.Title)
 			articleID, err := NullableID(qtx.GetArticleIDBySlug(ctx, uniqueSlug))
 			if err != nil {
+				fmt.Printf("4: error: %v", err)
 				return nil, err
 			}
 			if articleID == "" {
@@ -170,12 +181,15 @@ func (store *ConduitStore) UpdateArticleTx(
 			}
 		}
 	}
+	fmt.Printf("arg: %+v\n", arg)
 	updatedArticle, err := qtx.UpdateArticle(ctx, arg.UpdateArticleParams)
 	if err != nil {
+		fmt.Printf("5: error: %v\n", err)
 		return nil, err
 	}
 	article, err := qtx.GetArticleBySlug(ctx, updatedArticle.Slug)
 	if err != nil {
+		fmt.Printf("6: error: %v\n", err)
 		return nil, err
 	}
 	favorited, err := qtx.DoesFavoriteExist(ctx, DoesFavoriteExistParams{
@@ -183,9 +197,11 @@ func (store *ConduitStore) UpdateArticleTx(
 		UserID:    article.AuthorID,
 	})
 	if err != nil {
+		fmt.Printf("7: error: %v", err)
 		return nil, err
 	}
 	if err = tx.Commit(context.Background()); err != nil {
+		fmt.Printf("8: error: %v", err)
 		return nil, err
 	}
 	return &UpdateArticleTxResult{
