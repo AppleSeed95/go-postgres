@@ -918,10 +918,10 @@ func newCommentsResponse(
 		}, len(comments)),
 	}
 	for i, comment := range comments {
-		res.Comments[i].ID = comment.ID
-		res.Comments[i].CreatedAt = comment.CreatedAt
-		res.Comments[i].UpdatedAt = comment.UpdatedAt
-		res.Comments[i].Body = comment.Body
+		res.Comments[i].ID = &comment.ID
+		res.Comments[i].CreatedAt = &comment.CreatedAt
+		res.Comments[i].UpdatedAt = &comment.UpdatedAt
+		res.Comments[i].Body = &comment.Body
 		res.Comments[i].Author.Username = comment.Username
 		res.Comments[i].Author.Bio = comment.Bio
 		res.Comments[i].Author.Image = comment.Image

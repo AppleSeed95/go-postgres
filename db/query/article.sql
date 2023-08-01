@@ -130,14 +130,11 @@ SELECT
     u.id AS author_id,
     u.username,
     u.bio,
-    u.image     
-FROM (
-    SELECT id
-    FROM articles
-    WHERE slug = $1
-) a
-LEFT JOIN comments c ON a.id = c.article_id 
-LEFT JOIN users u ON c.author_id = u.id;
+    u.image 
+FROM comments c
+LEFT JOIN articles a ON a.id = c.article_id
+LEFT JOIN users u ON u.id = c.author_id
+WHERE a.slug = $1;
 
 -- name: GetArticlesByTag :many
 WITH article_tags_cte AS (

@@ -1042,25 +1042,22 @@ SELECT
     u.id AS author_id,
     u.username,
     u.bio,
-    u.image     
-FROM (
-    SELECT id
-    FROM articles
-    WHERE slug = $1
-) a
-LEFT JOIN comments c ON a.id = c.article_id 
-LEFT JOIN users u ON c.author_id = u.id
+    u.image 
+FROM comments c
+LEFT JOIN articles a ON a.id = c.article_id
+LEFT JOIN users u ON u.id = c.author_id
+WHERE a.slug = $1
 `
 
 type GetCommentsBySlugRow struct {
-	ID        *string    `json:"id"`
-	Body      *string    `json:"body"`
-	CreatedAt *time.Time `json:"created_at"`
-	UpdatedAt *time.Time `json:"updated_at"`
-	AuthorID  *string    `json:"author_id"`
-	Username  *string    `json:"username"`
-	Bio       *string    `json:"bio"`
-	Image     *string    `json:"image"`
+	ID        string    `json:"id"`
+	Body      string    `json:"body"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	AuthorID  *string   `json:"author_id"`
+	Username  *string   `json:"username"`
+	Bio       *string   `json:"bio"`
+	Image     *string   `json:"image"`
 }
 
 func (q *Queries) GetCommentsBySlug(ctx context.Context, slug string) ([]*GetCommentsBySlugRow, error) {
