@@ -16,6 +16,7 @@ import (
 	conf "github.com/aliml92/realworld-gin-sqlc/config"
 	db "github.com/aliml92/realworld-gin-sqlc/db/sqlc"
 	"github.com/aliml92/realworld-gin-sqlc/logger"
+	"github.com/aliml92/realworld-gin-sqlc/search/typesense"
 )
 
 // @produce	application/json
@@ -81,9 +82,16 @@ func main() {
 
 	store := db.NewConduitStore(dbConn)
 
+	tsClient := typesense.NewClient(&config)
+	tsHandler := typesense.NewTypesenseHandler(tsClient, "articles")
+	err := tsHandler.CreateCollection()
+	if err != nil {
+		log.Fatal(err)
+	}
 	server := api.NewServer(
 		config,
 		store,
+		tsHandler,
 		log,
 	)
 

@@ -10,9 +10,20 @@ services:
     expose:
       - 5432          
     networks:
-      - postgres
+      - local_net
     restart: unless-stopped
+  
+  typesense:
+    image: typesense/typesense:0.24.1
+    restart: on-failure
+    ports:
+      - "8108:8108"
+    volumes:
+      - ./typesense-data:/data
+    command: '--data-dir /data --api-key=xyz --enable-cors'
+    networks:
+      - local_net
 
 networks:
-  postgres:
+  local_net:
     driver: bridge

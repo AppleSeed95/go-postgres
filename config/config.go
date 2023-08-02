@@ -25,6 +25,9 @@ type Config struct {
 	ApiSecret           string        `mapstructure:"API_SECRET"`
 	AccessTokenDuration time.Duration `mapstructure:"TOKEN_HOUR_LIFESPAN"`
 	// RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
+
+	TypesenseAddr  string `mapstructure:"TYPESENSE_ADDR"`
+	TypesenseAPIKEY string `mapstructure:"TYPESENSE_APIKEY"`
 }
 
 func LoadConfig(name string, path string) (config Config) {
