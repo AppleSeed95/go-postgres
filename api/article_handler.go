@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgtype"
 
 	db "github.com/aliml92/realworld-gin-sqlc/db/sqlc"
+	"github.com/aliml92/realworld-gin-sqlc/search"
 )
 
 type listQuery struct {
@@ -631,6 +632,22 @@ func (s *Server) CreateArticle(c *gin.Context) { // TODO:✅ POST /articles - Cr
 		c.JSON(http.StatusInternalServerError, NewError(err))
 		return
 	}
+	a := search.Article{
+		ID: p.ID,
+		AuthorID: p.AuthorID,
+		Slug: articleTx.Article.Slug,
+		Title: p.Title,
+		Description: p.Description,
+		Body: p.Body,
+		CreatedAt: articleTx.Article.CreatedAt,
+		UpdatedAt: articleTx.Article.UpdatedAt,
+	}
+	err = s.search.CreateArticle(c.Request.Context(), a)
+	if err != nil {
+		s.log.Error(err)
+		c.JSON(http.StatusInternalServerError, NewError(err))
+		return
+	}
 	c.JSON(http.StatusCreated, newArticleTxResponse(articleTx))
 }
 
@@ -708,6 +725,30 @@ func (s *Server) UpdateArticle(c *gin.Context) { // TODO:✅ PUT /articles/:slug
 		c.JSON(http.StatusInternalServerError, NewError(err))
 		return
 	}
+	au := search.ArticleUpdate{
+		ID: articleTx.Article.ID,
+		Updates: struct{
+			Slug 		*string 	`json:"slug,omitempty"` 
+			Title 		*string 	`json:"title,omitempty"` 
+			Description *string 	`json:"description,omitempty"` 
+			Body 		*string 	`json:"body,omitempty"`
+			UpdatedAt    time.Time   `json:"updated_at"` 
+		}{
+			Title: p.Title,
+			Description: p.Description,
+			Body: p.Body,
+			UpdatedAt: articleTx.Article.UpdatedAt,
+		},
+	}
+	if p.Title != nil {
+		au.Updates.Slug = &articleTx.Article.Slug
+	}
+	err = s.search.UpdateArticle(c.Request.Context(), au)
+	if err != nil {
+		s.log.Error(err)
+		c.JSON(http.StatusInternalServerError, NewError(err))
+		return
+	}
 	c.JSON(http.StatusOK, newArticleResponse(articleTx.Article, articleTx.Favorited, articleTx.Following))
 }
 
@@ -731,6 +772,11 @@ func (s *Server) DeleteArticle(c *gin.Context) { // TODO:✅ DELETE /articles/:s
 		Slug:   slug,
 		UserID: authorID,
 	}
+	id, err := s.store.GetArticleIDBySlug(c.Request.Context(), slug)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, NewError(err))
+		return		
+	}
 	if err := s.store.DeleteArticleTx(c, p); err != nil {
 		if errors.Is(err, db.ErrForbidden) {
 			c.JSON(http.StatusForbidden, NewError(err))
@@ -740,6 +786,10 @@ func (s *Server) DeleteArticle(c *gin.Context) { // TODO:✅ DELETE /articles/:s
 			c.JSON(http.StatusNoContent, nil)
 			return
 		}
+		c.JSON(http.StatusInternalServerError, NewError(err))
+		return
+	}
+	if err := s.search.DeleteArticle(c.Request.Context(), id); err != nil {
 		c.JSON(http.StatusInternalServerError, NewError(err))
 		return
 	}
@@ -1059,4 +1109,53 @@ func newTagsResponse(tags []string) *tagsResponse {
 	return &tagsResponse{
 		Tags: tags,
 	}
+}
+
+type searchQuery struct {
+	Q        string `form:"q" binding:"required"`
+	Page     int    `form:"page" binding:"omitempty"`
+	PerPage  int    `form:"per_page" binding:"omitempty"`  
+}
+
+func (query *searchQuery) bind(c *gin.Context, params *search.SearchParams) error {
+	if err := c.ShouldBindQuery(query); err != nil {
+		return err
+	}
+	params.Q = query.Q
+	if query.Page == 0 {
+		params.Page = 1
+	}
+	if query.PerPage == 0 {
+		params.PerPage = 10
+	}
+	return nil
+}
+
+// SearchArticles godoc
+// @Summary Search for articles
+// @Description Search for articles
+// @Tags articles
+// @Accept json
+// @Param q path string true "query"
+// @Param page path int true "page"
+// @Param per_page path int true "per page"
+// @Produce json
+// @Success 200 {object} search.ArticlesWithCount
+// @Failure 422 {object} Error
+// @Failure 500 {object} Error
+// @Router /articles/search [get]
+func (s *Server) SearchArticles(c *gin.Context) {
+	var (
+		query searchQuery
+		params search.SearchParams
+	)
+	if err := query.bind(c, &params); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, NewValidationError(err))
+	}
+	articlesWithCount, err := s.search.Search(c.Request.Context(), params)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, NewError(err))
+		return
+	}
+	c.JSON(http.StatusOK, articlesWithCount)
 }

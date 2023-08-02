@@ -12,7 +12,7 @@ import (
 
 func newTestServer(t *testing.T, store db.Store) *Server {
 	conf := config.LoadConfig("test", "../env/")
-	server := NewServer(conf, store, nil)
+	server := NewServer(conf, store, nil, nil)
 	server.MountHandlers()
 	return server
 }

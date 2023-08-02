@@ -11,16 +11,18 @@ import (
 	db "github.com/aliml92/realworld-gin-sqlc/db/sqlc"
 	"github.com/aliml92/realworld-gin-sqlc/docs"
 	"github.com/aliml92/realworld-gin-sqlc/logger"
+	"github.com/aliml92/realworld-gin-sqlc/search"
 )
 
 type Server struct {
 	config config.Config
 	router *gin.Engine
 	store  db.Store
+	search search.Searcher
 	log    logger.Logger
 }
 
-func NewServer(config config.Config, store db.Store, log logger.Logger) *Server {
+func NewServer(config config.Config, store db.Store, tsHandler search.Searcher, log logger.Logger) *Server {
 	var engine *gin.Engine
 	if config.Environment == "test" {
 		gin.SetMode(gin.ReleaseMode)
@@ -33,6 +35,7 @@ func NewServer(config config.Config, store db.Store, log logger.Logger) *Server 
 		config: config,
 		router: engine,
 		store:  store,
+		search: tsHandler,
 		log:    log,
 	}
 	return server
@@ -55,6 +58,7 @@ func (s *Server) MountHandlers() {
 	profiles.DELETE("/:username/follow", s.UnfollowUser)
 
 	articles := api.Group("/articles")
+	articles.GET("/search", s.SearchArticles)
 	articles.GET("", s.ListArticles)
 	articles.GET("/:slug", s.GetArticle)
 	articles.GET("/:slug/comments", s.GetComments)
