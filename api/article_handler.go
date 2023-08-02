@@ -633,14 +633,14 @@ func (s *Server) CreateArticle(c *gin.Context) { // TODO:✅ POST /articles - Cr
 		return
 	}
 	a := search.Article{
-		ID: p.ID,
-		AuthorID: p.AuthorID,
-		Slug: articleTx.Article.Slug,
-		Title: p.Title,
+		ID:          p.ID,
+		AuthorID:    p.AuthorID,
+		Slug:        articleTx.Article.Slug,
+		Title:       p.Title,
 		Description: p.Description,
-		Body: p.Body,
-		CreatedAt: articleTx.Article.CreatedAt,
-		UpdatedAt: articleTx.Article.UpdatedAt,
+		Body:        p.Body,
+		CreatedAt:   articleTx.Article.CreatedAt,
+		UpdatedAt:   articleTx.Article.UpdatedAt,
 	}
 	err = s.search.CreateArticle(c.Request.Context(), a)
 	if err != nil {
@@ -727,17 +727,17 @@ func (s *Server) UpdateArticle(c *gin.Context) { // TODO:✅ PUT /articles/:slug
 	}
 	au := search.ArticleUpdate{
 		ID: articleTx.Article.ID,
-		Updates: struct{
-			Slug 		*string 	`json:"slug,omitempty"` 
-			Title 		*string 	`json:"title,omitempty"` 
-			Description *string 	`json:"description,omitempty"` 
-			Body 		*string 	`json:"body,omitempty"`
-			UpdatedAt    time.Time   `json:"updated_at"` 
+		Updates: struct {
+			Slug        *string   `json:"slug,omitempty"`
+			Title       *string   `json:"title,omitempty"`
+			Description *string   `json:"description,omitempty"`
+			Body        *string   `json:"body,omitempty"`
+			UpdatedAt   time.Time `json:"updated_at"`
 		}{
-			Title: p.Title,
+			Title:       p.Title,
 			Description: p.Description,
-			Body: p.Body,
-			UpdatedAt: articleTx.Article.UpdatedAt,
+			Body:        p.Body,
+			UpdatedAt:   articleTx.Article.UpdatedAt,
 		},
 	}
 	if p.Title != nil {
@@ -775,7 +775,7 @@ func (s *Server) DeleteArticle(c *gin.Context) { // TODO:✅ DELETE /articles/:s
 	id, err := s.store.GetArticleIDBySlug(c.Request.Context(), slug)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, NewError(err))
-		return		
+		return
 	}
 	if err := s.store.DeleteArticleTx(c, p); err != nil {
 		if errors.Is(err, db.ErrForbidden) {
@@ -1112,9 +1112,9 @@ func newTagsResponse(tags []string) *tagsResponse {
 }
 
 type searchQuery struct {
-	Q        string `form:"q" binding:"required"`
-	Page     int    `form:"page" binding:"omitempty"`
-	PerPage  int    `form:"per_page" binding:"omitempty"`  
+	Q       string `form:"q" binding:"required"`
+	Page    int    `form:"page" binding:"omitempty"`
+	PerPage int    `form:"per_page" binding:"omitempty"`
 }
 
 func (query *searchQuery) bind(c *gin.Context, params *search.SearchParams) error {
@@ -1146,7 +1146,7 @@ func (query *searchQuery) bind(c *gin.Context, params *search.SearchParams) erro
 // @Router /articles/search [get]
 func (s *Server) SearchArticles(c *gin.Context) {
 	var (
-		query searchQuery
+		query  searchQuery
 		params search.SearchParams
 	)
 	if err := query.bind(c, &params); err != nil {

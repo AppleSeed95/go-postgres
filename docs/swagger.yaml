@@ -265,6 +265,34 @@ definitions:
             type: string
         type: object
     type: object
+  search.Article:
+    properties:
+      author_id:
+        type: string
+      body:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      slug:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  search.ArticlesWithCount:
+    properties:
+      articles:
+        items:
+          $ref: '#/definitions/search.Article'
+        type: array
+      totarticlesCount:
+        type: integer
+    type: object
 info:
   contact: {}
 paths:
@@ -657,6 +685,45 @@ paths:
       security:
       - Bearer: []
       summary: Feed articles
+      tags:
+      - articles
+  /articles/search:
+    get:
+      consumes:
+      - application/json
+      description: Search for articles
+      parameters:
+      - description: query
+        in: path
+        name: q
+        required: true
+        type: string
+      - description: page
+        in: path
+        name: page
+        required: true
+        type: integer
+      - description: per page
+        in: path
+        name: per_page
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/search.ArticlesWithCount'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Error'
+      summary: Search for articles
       tags:
       - articles
   /profiles/{username}:

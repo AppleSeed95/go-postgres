@@ -12,7 +12,6 @@ type Searcher interface {
 	Search(ctx context.Context, params SearchParams) (*ArticlesWithCount, error)
 }
 
-
 type ArticlesWithCount struct {
 	Articles []Article `json:"articles"`
 	Total    int       `json:"totarticlesCount"`
@@ -30,18 +29,18 @@ type Article struct {
 }
 
 type ArticleUpdate struct {
-	ID         string     `json:"id"`
-	Updates    struct     {
-		Slug         *string     `json:"slug,omitempty"`
-		Title        *string     `json:"title,omitempty"`
-		Description  *string     `json:"description,omitempty"`
-		Body         *string     `json:"body,omitempty"`
-		UpdatedAt    time.Time   `json:"updated_at"`  
-	}    
-} 
+	ID      string `json:"id"`
+	Updates struct {
+		Slug        *string   `json:"slug,omitempty"`
+		Title       *string   `json:"title,omitempty"`
+		Description *string   `json:"description,omitempty"`
+		Body        *string   `json:"body,omitempty"`
+		UpdatedAt   time.Time `json:"updated_at"`
+	}
+}
 
 type SearchParams struct {
-	Q       string 
+	Q       string
 	Page    int
-	PerPage int 
+	PerPage int
 }

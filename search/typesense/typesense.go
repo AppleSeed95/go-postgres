@@ -5,24 +5,24 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aliml92/realworld-gin-sqlc/config"
-	"github.com/aliml92/realworld-gin-sqlc/search"
 	ts "github.com/typesense/typesense-go/typesense"
 	"github.com/typesense/typesense-go/typesense/api"
 	"github.com/typesense/typesense-go/typesense/api/pointer"
+
+	"github.com/aliml92/realworld-gin-sqlc/config"
+	"github.com/aliml92/realworld-gin-sqlc/search"
 )
 
-
 type TypesenseHandler struct {
-	Client      *ts.Client
-	Collection  string
+	Client     *ts.Client
+	Collection string
 }
 
 func NewTypesenseHandler(client *ts.Client, collectionName string) *TypesenseHandler {
 	return &TypesenseHandler{
-		Client: client,
+		Client:     client,
 		Collection: collectionName,
-	}		
+	}
 }
 
 func NewClient(config *config.Config) *ts.Client {
@@ -37,19 +37,18 @@ func NewClient(config *config.Config) *ts.Client {
 	return client
 }
 
-
 func (th TypesenseHandler) CreateCollection() error {
 	schema := &api.CollectionSchema{
 		Name: th.Collection,
 		Fields: []api.Field{
 			{
-				Name: "author_id",
-				Type: "string",
+				Name:  "author_id",
+				Type:  "string",
 				Facet: pointer.True(),
 			},
 			{
-				Name: "slug",
-				Type: "string",
+				Name:  "slug",
+				Type:  "string",
 				Facet: pointer.True(),
 			},
 			{
@@ -68,13 +67,13 @@ func (th TypesenseHandler) CreateCollection() error {
 				Facet: pointer.False(),
 			},
 			{
-				Name: "created_at",
-				Type: "int64",
+				Name:  "created_at",
+				Type:  "int64",
 				Facet: pointer.True(),
 			},
 			{
-				Name: "updated_at",
-				Type: "int64",
+				Name:  "updated_at",
+				Type:  "int64",
 				Facet: pointer.True(),
 			},
 		},
@@ -93,23 +92,23 @@ func (th TypesenseHandler) CreateCollection() error {
 
 func (th *TypesenseHandler) CreateArticle(_ context.Context, article search.Article) error {
 	a := struct {
-		ID          string    `json:"id,omitempty"`
-		AuthorID    string    `json:"author_id"`
-		Slug        string    `json:"slug"`
-		Title       string    `json:"title"`
-		Description string    `json:"description"`
-		Body        string    `json:"body"`
-		CreatedAt   int64     `json:"created_at"`
-		UpdatedAt   int64     `json:"updated_at"`
+		ID          string `json:"id,omitempty"`
+		AuthorID    string `json:"author_id"`
+		Slug        string `json:"slug"`
+		Title       string `json:"title"`
+		Description string `json:"description"`
+		Body        string `json:"body"`
+		CreatedAt   int64  `json:"created_at"`
+		UpdatedAt   int64  `json:"updated_at"`
 	}{
-		ID: article.ID,
-		AuthorID: article.AuthorID,
-		Slug: article.Slug,
-		Title: article.Title,
+		ID:          article.ID,
+		AuthorID:    article.AuthorID,
+		Slug:        article.Slug,
+		Title:       article.Title,
 		Description: article.Description,
-		Body: article.Body,
-		CreatedAt: article.CreatedAt.Unix(),
-		UpdatedAt: article.CreatedAt.Unix(),
+		Body:        article.Body,
+		CreatedAt:   article.CreatedAt.Unix(),
+		UpdatedAt:   article.CreatedAt.Unix(),
 	}
 	_, err := th.Client.Collection(th.Collection).Documents().Create(a)
 	return err
@@ -117,17 +116,17 @@ func (th *TypesenseHandler) CreateArticle(_ context.Context, article search.Arti
 
 func (th *TypesenseHandler) UpdateArticle(_ context.Context, article search.ArticleUpdate) error {
 	a := struct {
-		Slug        string    `json:"slug,omitempty"`
-		Title       string    `json:"title,omitmepty"`
-		Description string    `json:"description,omitempty"`
-		Body        string    `json:"body,omitempty"`
-		UpdatedAt   int64     `json:"updated_at,omitempty"`
+		Slug        string `json:"slug,omitempty"`
+		Title       string `json:"title,omitmepty"`
+		Description string `json:"description,omitempty"`
+		Body        string `json:"body,omitempty"`
+		UpdatedAt   int64  `json:"updated_at,omitempty"`
 	}{
-		Slug: *article.Updates.Slug,
-		Title: *article.Updates.Title,
+		Slug:        *article.Updates.Slug,
+		Title:       *article.Updates.Title,
 		Description: *article.Updates.Description,
-		Body: *article.Updates.Body,
-		UpdatedAt: article.Updates.UpdatedAt.Unix(),
+		Body:        *article.Updates.Body,
+		UpdatedAt:   article.Updates.UpdatedAt.Unix(),
 	}
 	_, err := th.Client.Collection(th.Collection).Document(article.ID).Update(a)
 	if strings.Contains(err.Error(), "201") {
@@ -146,11 +145,11 @@ func (th *TypesenseHandler) DeleteArticle(_ context.Context, id string) error {
 
 func (th *TypesenseHandler) Search(_ context.Context, params search.SearchParams) (*search.ArticlesWithCount, error) {
 	searchParams := api.SearchCollectionParams{
-		Q: 		 params.Q,
-		QueryBy: "title, description, body",
+		Q:        params.Q,
+		QueryBy:  "title, description, body",
 		NumTypos: pointer.String("1,2,2"),
-		Page: &params.Page,
-		PerPage: &params.PerPage,
+		Page:     &params.Page,
+		PerPage:  &params.PerPage,
 	}
 	result, err := th.Client.Collection(th.Collection).Documents().Search(&searchParams)
 	if err != nil {
@@ -164,12 +163,12 @@ func (th *TypesenseHandler) Search(_ context.Context, params search.SearchParams
 	for _, hit := range *result.Hits {
 		document := *hit.Document
 		article := search.Article{
-			ID: document["id"].(string),
-			AuthorID: document["author_id"].(string),
-			Slug: document["slug"].(string),
-			Title: document["title"].(string),
+			ID:          document["id"].(string),
+			AuthorID:    document["author_id"].(string),
+			Slug:        document["slug"].(string),
+			Title:       document["title"].(string),
 			Description: document["description"].(string),
-			Body: document["body"].(string),
+			Body:        document["body"].(string),
 		}
 		createdAt := document["created_at"].(float64)
 		updatedAt := document["updated_at"].(float64)
@@ -178,7 +177,7 @@ func (th *TypesenseHandler) Search(_ context.Context, params search.SearchParams
 		articles = append(articles, article)
 	}
 	return &search.ArticlesWithCount{
-		Total: *total,
+		Total:    *total,
 		Articles: articles,
 	}, nil
 }

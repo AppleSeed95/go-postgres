@@ -29,6 +29,7 @@ This codebase was created to demonstrate a fully fledged fullstack application b
 * Also uses:
     * *PostgreSQL* for the database
     * *Elasticsearch* for the search engine (optional, to be implemented)
+    * *Typesense* for the search engine
 # Getting started 
 Running the project locally:
 
@@ -58,4 +59,4 @@ This will start postgres container and the project itself. Then, run the tests w
 * [x] Add unit tests for handlers (... in progress)
 * [ ] Improve error handling and logging
 * [x] Improve deployment and testing configuration (Makefile, docker-compose, etc.) ( ... in progress)
-* [ ] Add search feature (`/search`, ...)
+* [x] Add search feature (`/search`, ...)
