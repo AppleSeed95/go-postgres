@@ -1,10 +1,5 @@
-[![test](https://github.com/aliml92/realworld-gin-sqlc/actions/workflows/test.yaml/badge.svg?branch=master&event=push)](https://github.com/aliml92/realworld-gin-sqlc/actions/workflows/test.yaml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/aliml92/realworld-gin-sqlc/blob/master/LICENSE)
 
-
-
-
-This codebase was created to demonstrate a fully fledged fullstack application built with **Golang/Gin** including CRUD operations, authentication, routing, pagination, and more.
+Fullstack application built with **Golang/Gin** including CRUD operations, authentication, routing, pagination, and more.
 
 
 # How it works
